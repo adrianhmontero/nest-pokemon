@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Model } from 'mongoose';
@@ -18,9 +22,23 @@ export class PokemonService {
   async create(createPokemonDto: CreatePokemonDto) {
     createPokemonDto.name = createPokemonDto.name.toLocaleLowerCase();
 
-    const pokemon = await this.pokemonModel.create(createPokemonDto);
-
-    return pokemon;
+    try {
+      const pokemon = await this.pokemonModel.create(createPokemonDto);
+      return pokemon;
+    } catch (error) {
+      /**
+       * Este código 11000 indica que ya existe un registro en DB que coincide con ese valor.  */
+      if (error.code === 11000)
+        throw new BadRequestException(
+          `pokemon exists in DB ${JSON.stringify(error.keyValue)}`,
+        );
+      /**
+       * Si no es error 11000, tenemos que revisar qué salió mal, y para indicar esto al frontend necesitamos usar el siguiente Exception Filter
+       */
+      throw new InternalServerErrorException(
+        `Can not create Pokemon - Check server logs`,
+      );
+    }
   }
 
   findAll() {

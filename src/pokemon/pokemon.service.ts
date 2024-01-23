@@ -2,10 +2,11 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { Pokemon } from './entities/pokemon.entity';
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -45,8 +46,30 @@ export class PokemonService {
     return `This action returns all pokemon`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pokemon`;
+  /* Esta función es asíncrona porque tenemos que hacer conexiones a la DB. */
+  async findOne(term: string) {
+    /* Declarando pokemon de tipo Pokemon estamos diciendo también que es de ese tipo de entidad (Pokemon) */
+    let pokemon: Pokemon;
+
+    /* Si el param term es un número, significa que el cliente está tratando de buscar un pokemon por no (Número) */
+    if (!isNaN(+term)) {
+      pokemon = await this.pokemonModel.findOne({ no: term });
+    }
+    /* La función isValidObjectId nos permite verificar si el término de búsqueda (term) es de tipo mongo ID. */
+    if (!pokemon && isValidObjectId(term))
+      pokemon = await this.pokemonModel.findById(term);
+
+    if (!pokemon)
+      pokemon = await this.pokemonModel.findOne({
+        name: term.toLowerCase().trim(),
+      });
+
+    if (!pokemon)
+      throw new NotFoundException(
+        `Pokemon with id, name or no ${term} not found.`,
+      );
+
+    return pokemon;
   }
 
   update(id: number, updatePokemonDto: UpdatePokemonDto) {

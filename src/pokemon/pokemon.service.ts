@@ -27,18 +27,7 @@ export class PokemonService {
       const pokemon = await this.pokemonModel.create(createPokemonDto);
       return pokemon;
     } catch (error) {
-      /**
-       * Este código 11000 indica que ya existe un registro en DB que coincide con ese valor.  */
-      if (error.code === 11000)
-        throw new BadRequestException(
-          `pokemon exists in DB ${JSON.stringify(error.keyValue)}`,
-        );
-      /**
-       * Si no es error 11000, tenemos que revisar qué salió mal, y para indicar esto al frontend necesitamos usar el siguiente Exception Filter
-       */
-      throw new InternalServerErrorException(
-        `Can not create Pokemon - Check server logs`,
-      );
+      this.handleExceptions(error, 'PATCH');
     }
   }
 
@@ -72,11 +61,44 @@ export class PokemonService {
     return pokemon;
   }
 
-  update(id: number, updatePokemonDto: UpdatePokemonDto) {
-    return `This action updates a #${id} pokemon`;
+  async update(term: string, updatePokemonDto: UpdatePokemonDto) {
+    const pokemon = await this.findOne(term);
+    if (updatePokemonDto.name)
+      updatePokemonDto.name = updatePokemonDto.name.toLowerCase();
+
+    try {
+      /** updateOne es una query que Mongo nos ofrece.
+       * El segundo argumento de la query es un objeto con new como true. Esto indica que vamos a almacenar en pokemon el nuevo documento. Es decir, el nuevo valor del
+       * pokemon que estamos actualizando. Si nosotros no indicáramos esto en la ejecución de la query, pokemon tendría el valor inicial al encontrarlo en DB.
+       */
+      await pokemon.updateOne(updatePokemonDto, { new: true });
+      return { ...pokemon.toJSON(), ...updatePokemonDto };
+    } catch (error) {
+      this.handleExceptions(error, 'PATCH');
+    }
   }
 
   remove(id: number) {
     return `This action removes a #${id} pokemon`;
+  }
+
+  private handleExceptions(error: any, method: string = 'GET') {
+    const methods = {
+      PATCH: 'update',
+      GET: 'get',
+      POST: 'create',
+    };
+    /**
+     * Este código 11000 indica que ya existe un registro en DB que coincide con ese valor.  */
+    if (error.code === 11000)
+      throw new BadRequestException(
+        `pokemon exists in DB ${JSON.stringify(error.keyValue)}`,
+      );
+    /**
+     * Si no es error 11000, tenemos que revisar qué salió mal, y para indicar esto al frontend necesitamos usar el siguiente Exception Filter
+     */
+    throw new InternalServerErrorException(
+      `Can not ${methods[method]} Pokemon - Check server logs`,
+    );
   }
 }

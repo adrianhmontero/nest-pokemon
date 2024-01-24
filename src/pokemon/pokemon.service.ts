@@ -79,8 +79,20 @@ export class PokemonService {
   }
 
   async remove(id: string) {
-    const pokemon = await this.findOne(id);
-    await pokemon.deleteOne();
+    /* Las lineas de abajo están comentadas porque cada una de ellas representa una consulta a DB, y eso no es lo más óptimo. */
+    /*  const pokemon = await this.findOne(id);
+    await pokemon.deleteOne(); */
+    /* El método deleteOne nos permite INTENTAR eliminar el registro con la(s) propiedad(es) indicadas en el objeto como argumento
+    y nos devolverá un objeto con dos datos: deletedCount y acknowledged. El primero nos permitirá saber si realmente se eliminó
+    el registro que intentamos borrar. En caso de que su valor sea 1, significará que se eliminó satisfactoriamente. En caso de
+    ser cero, significará que no encontró ningún registro que coincida con nuestra búsqueda, por lo que podremos manejar la 
+    excepción para el cliente. */
+    const { deletedCount } = await this.pokemonModel.deleteOne({ _id: id });
+
+    if (deletedCount === 0)
+      throw new BadRequestException(`Pokemon with id ${id} is not found.`);
+
+    return;
   }
 
   private handleExceptions(error: any, method: string = 'GET') {

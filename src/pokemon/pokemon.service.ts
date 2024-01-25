@@ -9,6 +9,7 @@ import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Model, isValidObjectId } from 'mongoose';
 import { Pokemon } from './entities/pokemon.entity';
 import { InjectModel } from '@nestjs/mongoose';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Injectable()
 export class PokemonService {
@@ -31,8 +32,18 @@ export class PokemonService {
     }
   }
 
-  findAll() {
-    return `This action returns all pokemon`;
+  findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto;
+    return (
+      this.pokemonModel
+        .find()
+        .limit(limit)
+        .skip(offset)
+        /* el sort con no: 1 ordena los elementos por no de forma ascendente. Es decir, del menor al mayor. */
+        .sort({ no: 1 })
+        /* Este select con ese argumento indica que va a omitir la devolución de la propiedad __v en cada elemento. */
+        .select('-__v')
+    );
   }
 
   /* Esta función es asíncrona porque tenemos que hacer conexiones a la DB. */

@@ -13,6 +13,13 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      /* Usar el transform puede ser contraproducente, ¿por qué?, porque al habilitarlo, aquellas peticiones que contengan DTOs
+      con reglas o validaciones específicas tales como IsNumber en sus propiedades, se necesitará procesar estos datos y eso
+      consume más memoria.  */
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 

@@ -12,5 +12,8 @@ import { Pokemon, PokemonSchema } from './entities/pokemon.entity';
     para usar las clases en nuestros servicios, debemos hacer lo siguiente: */
     MongooseModule.forFeature([{ name: Pokemon.name, schema: PokemonSchema }]),
   ],
+  /* Para que nosotros podamos usar un modelo de nuestro módulo, tenemos que exportar el MongooseModule que tiene la definición del esquema de ese modelo. 
+  No olvidar que debemos añadir este módulo (PokemonModule) a las importaciones del módulo donde queremos usar el modelo. */
+  exports: [MongooseModule],
 })
 export class PokemonModule {}

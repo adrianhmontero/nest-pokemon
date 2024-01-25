@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import axios, { AxiosInstance } from 'axios';
 import { PokeResponse } from './interfaces/poke-response.interface';
-import { PokemonService } from 'src/pokemon/pokemon.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Pokemon } from 'src/pokemon/entities/pokemon.entity';
 import { Model } from 'mongoose';
+import { AxiosAdapter } from 'src/common/adapters/axios.adapter';
 
 @Injectable()
 export class SeedService {
@@ -13,9 +12,8 @@ export class SeedService {
     saber cómo va a inyectarlo en la DB. */
     @InjectModel(Pokemon.name)
     private readonly pokemonModel: Model<Pokemon>,
+    private readonly http: AxiosAdapter,
   ) {}
-
-  private readonly axios: AxiosInstance = axios;
 
   async executeSeed() {
     /* La linea de abajo nos sirve para poder eliminar todos los registros de una taba o documento. En este caso, pokemon. Es lo mismo que la
@@ -23,7 +21,7 @@ export class SeedService {
     await this.pokemonModel.deleteMany({});
 
     let pokemonsToInsert: { name: string; no: number }[] = [];
-    const { data } = await this.axios.get<PokeResponse>(
+    const data = await this.http.get<PokeResponse>(
       'https://pokeapi.co/api/v2/pokemon?limit=650',
     );
 

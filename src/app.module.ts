@@ -25,7 +25,7 @@ import { JoiValidationSchema } from './config/joi.validation';
     }),
     /* Para crear la referencia a nuestra base de datos usaremos el método forRoot de Mongoose
     que recibe como argumento la URI de nuestra base de datos. */
-    MongooseModule.forRoot(process.env.MONGODB),
+    MongooseModule.forRoot(process.env.MONGODB, { dbName: 'pokeDB' }),
     PokemonModule,
     CommonModule,
     SeedModule,

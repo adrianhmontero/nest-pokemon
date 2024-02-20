@@ -9,13 +9,17 @@ import { PokemonModule } from './pokemon/pokemon.module';
 import { CommonModule } from './common/common.module';
 import { SeedModule } from './seed/seed.module';
 import { EnvConfiguration } from './config/app.config';
+import { JoiValidationSchema } from './config/joi.validation';
 
 @Module({
   imports: [
     /* Es importante que esta linea esté al principio porque significa que va a leer el archivo .env, y
     para que todos nuestros módulos importandos en nuestra app funcionen correctamente cuando utilicen variables
     de entorno, se necesita primero leer dicho archivo. */
-    ConfigModule.forRoot({ load: [EnvConfiguration] }),
+    ConfigModule.forRoot({
+      load: [EnvConfiguration],
+      validationSchema: JoiValidationSchema,
+    }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),

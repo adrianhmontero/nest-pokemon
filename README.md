@@ -22,11 +22,12 @@ npm i -g nestjs/cli
 ```
 docker-compose up -d
 ```
-5. Clonar el archivo __.env.template__ y renombrar la copia como __.env__.
 
-6. Llenar las variables de entorno definidas en el __.env__.
+5. Clonar el archivo **.env.template** y renombrar la copia como **.env**.
 
-7. Ejecturar la aplicación en dev: 
+6. Llenar las variables de entorno definidas en el **.env**.
+
+7. Ejecturar la aplicación en dev:
 
 ```
 yarn start:dev
@@ -42,3 +43,13 @@ http://localhost:3000/api/v2/seed
 
 - MongoDB
 - NestJS
+
+# Build de producción
+
+1. Crear el archivo `.env.prod`.
+2. Llenar las variables de entorno de prod.
+3. Crear la nueva imagen (Leer __build.run.md__ para más detalles.)
+
+```
+docker-compose -f docker-compose.prod.yaml --env-file .env.prod up
+```
